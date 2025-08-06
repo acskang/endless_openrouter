@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+  {% if message %}{{ message }} -{% endif %}
+  Clips
+{% endblock title %}
+{% block extra_head %}
+  <!-- Meta 태그 -->
+  <meta name="description"
+        content="{% block description %}영화 속 실제 대사를 검색하고 클립으로 감상하세요. playphrase.me와 IMDB 데이터를 활용한 한글 번역 서비스{% endblock description %}">
+  <meta name="keywords"
+        content="{% block keywords %}영화, 대사, 클립, 번역, 검색, playphrase, 영어학습{% endblock keywords %}">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <!-- 외부 CSS 라이브러리 -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        rel="stylesheet">
+{% endblock extra_head %}
+{% block content %}
+  <!-- 네트워크 상태 표시 -->
+  <div id="network-status"
+       class="alert alert-warning position-fixed top-0 start-50 translate-middle-x mt-3"
+       style="display: none;
+              z-index: 1060">
+    <i class="fas fa-wifi"></i> 오프라인 상태입니다. 일부 기능이 제한될 수 있습니다.
+  </div>
+  <!-- 로딩 오버레이 -->
+  {% include 'phrase/components/loading.html' %}
+  <!-- 메인 컨테이너 -->
+  <main class="main-content">
+    <div class="welcome-section">
+      <!-- 설명 섹션 -->
+      {% include 'phrase/components/info_section.html' %}
+    </div>
+    <div class="welcome-section mt-5">
+      <!-- 검색 폼 -->
+      {% include 'phrase/components/search_form.html' %}
+      <!-- 입력 확인 모달-->
+      {% include 'phrase/partials/confirmation_modal.html' %}
+      <!-- 오류 표시 -->
+      {% include 'phrase/components/error_section.html' %}
+      <!-- 검색 결과 정보 -->
+      {% include 'phrase/components/search_result_info.html' %}
+      <!-- 영화 카드 섹션 -->
+      {% include 'phrase/components/movies_section.html' %}
+      <!-- 스크립트 섹션 -->
+      {% include 'phrase/components/scripts.html' %}
+      <!-- 인기 검색어 섹션 -->
+      {% include 'phrase/components/popular_section.html' %}
+      <!-- 통계 섹션 -->
+      {% include 'phrase/components/statistics_section.html' %}
+    </div>
+  </main>
+  <!-- 모달들 -->
+  {% include 'phrase/components/modals.html' %}
+  <!-- 토스트 컨테이너 -->
+  <div id="toast-container"
+       class="position-fixed top-0 end-0 p-3"
+       style="z-index: 1100">
+    <!-- 동적으로 토스트 추가됨 -->
+  </div>
+  <!-- JavaScript -->
+  {% include 'phrase/partials/scripts_optimized.html' %}
+{% endblock content %}
+{% block extra_js %}
+  <!-- 입력 검증 관련 JavaScript -->
+  <script>
+// 입력 검증 관련 유틸리티
+function showValidationToast(message, type = 'warning') {
+    // Bootstrap Toast 사용 (있는 경우)
+    if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
+        const toastHtml = `
+            <div class="toast align-items-center text-white bg-${type}" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `;
+        
+        // Toast 컨테이너에 추가
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            document.body.appendChild(toastContainer);
+        }
+        
+        toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+        
+        const toastElement = toastContainer.lastElementChild;
+        const toast = new bootstrap.Toast(toastElement);
+        toast.show();
+        
+        // 자동 제거
+        setTimeout(() => {
+            toastElement.remove();
+        }, 5000);
+    } else {
+        // Fallback: 간단한 alert
+        alert(message);
+    }
+}
+
+// 검색 폼 제출 시 기본 검증
+document.addEventListener('DOMContentLoaded', function() {
+    const searchForm = document.getElementById('search-form');
+    if (searchForm) {
+        searchForm.addEventListener('submit', function(e) {
+            const searchInput = document.getElementById('unified-search-input') || 
+                              document.getElementById('search-input-desktop') || 
+                              document.getElementById('search-input-mobile');
+            
+            if (searchInput) {
+                const value = searchInput.value.trim();
+                
+                // 클라이언트 사이드 기본 검증
+                if (!value) {
+                    e.preventDefault();
+                    showValidationToast('검색할 텍스트를 입력해주세요.', 'danger');
+                    searchInput.focus();
+                    return false;
+                }
+                
+                if (value.length > 500) {
+                    e.preventDefault();
+                    showValidationToast('검색어는 500자를 초과할 수 없습니다.', 'danger');
+                    searchInput.focus();
+                    return false;
+                }
+            }
+        });
+    }
+});
+
+// 키보드 단축키
+document.addEventListener('keydown', function(e) {
+    // Ctrl+Enter로 원본 검색 (확인 모달에서)
+    if (e.ctrlKey && e.key === 'Enter') {
+        const modal = document.getElementById('search-confirmation-modal');
+        if (modal && modal.classList.contains('show')) {
+            proceedWithOriginal();
+        }
+    }
+});
+  </script>
+  <!-- 구조화된 데이터 -->
+  <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "플레이프레이즈",
+    "description": "영화 속 실제 대사를 검색하고 클립으로 감상하세요",
+    "url": "{{ request.build_absolute_uri }}",
+    "applicationCategory": "Entertainment",
+    "operatingSystem": "Web"
+}
+  </script>
+{% endblock extra_js %}

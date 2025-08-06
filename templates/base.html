@@ -1,0 +1,345 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+      {% block title %}Ahading{% endblock %}
+    </title>
+    <link rel="shortcut icon"
+          type="image/x-icon"
+          href="{% static 'img/favicon.ico' %}">
+    {% block extra_head %}
+    {% endblock extra_head %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    {% block extra_css %}
+    {% endblock extra_css %}
+  </head>
+  <body>
+    {% csrf_token %}
+    <nav class="navbar">
+      <div class="nav-container d-flex justify-content-between align-items-center w-100">
+        <a href="/" class="logo">TheSysM</a>
+        <div class="nav-links">
+          {% if user.is_authenticated %}
+            <a href="{% url 'phrase:index' %}">Movie Clip</a>
+            <a href="{% url 'account:logout' %}">Logout</a>
+          {% else %}
+            <a onclick="openModal('loginModal')">Login</a>
+            <a onclick="openModal('signupModal')">SignUp</a>
+          {% endif %}
+        </div>
+      </div>
+    </nav>
+    {% block content %}
+    {% endblock content %}
+    <main class="main-content">
+      <div class="welcome-section">
+        <h1>Welcome to TheSysM</h1>
+        {% if user.is_authenticated %}
+          <p>환영합니다, {{ user.username }}님!</p>
+        {% else %}
+          <p>로그인이 필요합니다</p>
+        {% endif %}
+      </div>
+    </main>
+    <!-- Login/Signup Modal -->
+    <!-- 로그인 모달 -->
+    <div id="loginModal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <span class="close" onclick="closeModal('loginModal')">&times;</span>
+        <form class="modal-form" method="post" action="{% url 'account:login' %}">
+          {% csrf_token %}
+          <h2>로그인</h2>
+          <!-- 메시지 표시 -->
+          <div id="loginMessages">
+            {% if messages %}
+              {% for message in messages %}
+                {% if 'login' in message.tags or 'error' in message.tags %}
+                  {% if message.tags == 'error' or 'login' in message.tags %}
+                    <div class="toast error"
+                         style="display: block;
+                                position: relative;
+                                top: auto;
+                                right: auto;
+                                margin-bottom: 1rem">{{ message }}</div>
+                  {% elif message.tags == 'success' %}
+                    <div class="toast success"
+                         style="display: block;
+                                position: relative;
+                                top: auto;
+                                right: auto;
+                                margin-bottom: 1rem">{{ message }}</div>
+                  {% elif message.tags == 'info' %}
+                    <div class="toast info"
+                         style="display: block;
+                                position: relative;
+                                top: auto;
+                                right: auto;
+                                margin-bottom: 1rem">{{ message }}</div>
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+          </div>
+          <input type="text"
+                 name="email_or_username"
+                 placeholder="이메일 또는 사용자명"
+                 value="{% if form_data.email_or_username %}{{ form_data.email_or_username }}{% endif %}"
+                 required>
+          <input type="password" name="password" placeholder="비밀번호" required>
+          <button type="submit">로그인</button>
+        </form>
+      </div>
+    </div>
+    <!-- 회원가입 모달 -->
+    <div id="signupModal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <span class="close" onclick="closeModal('signupModal')">&times;</span>
+        <h2>회원가입</h2>
+        <!-- 메시지 표시 -->
+        <div id="signupMessages">
+          {% if messages %}
+            {% for message in messages %}
+              {% if 'signup' in message.tags %}
+                {% if message.tags == 'error' or 'signup' in message.tags %}
+                  <div class="toast error"
+                       style="display: block;
+                              position: relative;
+                              top: auto;
+                              right: auto;
+                              margin-bottom: 1rem">{{ message }}</div>
+                {% elif message.tags == 'success' %}
+                  <div class="toast success"
+                       style="display: block;
+                              position: relative;
+                              top: auto;
+                              right: auto;
+                              margin-bottom: 1rem">{{ message }}</div>
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        </div>
+        <form class="modal-form"
+              id="signupForm"
+              method="post"
+              action="{% url 'account:signup' %}">
+          {% csrf_token %}
+          <input id="signupUsername"
+                 name="username"
+                 type="text"
+                 placeholder="사용자명"
+                 value="{% if form_data.username %}{{ form_data.username }}{% endif %}"
+                 required>
+          <input id="signupEmail"
+                 name="email"
+                 type="email"
+                 placeholder="이메일"
+                 value="{% if form_data.email %}{{ form_data.email }}{% endif %}"
+                 required>
+          <input id="signupPassword"
+                 name="password"
+                 type="password"
+                 placeholder="비밀번호"
+                 required>
+          <input id="signupPasswordConfirm"
+                 name="password_confirm"
+                 type="password"
+                 placeholder="비밀번호 확인"
+                 required>
+          <button type="submit">회원가입</button>
+        </form>
+      </div>
+    </div>
+    <!-- Real Chatting -->
+    <!-- Chat Floating Button -->
+    <button id="chatFloatingBtn"
+            class="chat-floating-btn"
+            {% if user.is_authenticated %}style="display: flex;"{% else %}style="display: none;"{% endif %}>💬</button>
+    <!-- Chat Modal - 항상 렌더링됨 -->
+    <div id="chatModal" class="chat-modal">
+      <div class="chat-header">
+        <div class="chat-title">TheSysM Support</div>
+        <button id="closeChat" class="close-chat">✕</button>
+      </div>
+      <div id="chatMessages" class="chat-messages">
+        <div class="message received">
+          <div class="message-content">
+            <p>반가워요! 난 AI Yaya 에요..</p>
+          </div>
+        </div>
+      </div>
+      <div class="chat-input">
+        <input type="text"
+               id="messageInput"
+               class="message-input"
+               placeholder="메시지를 입력하세요...">
+        <button id="sendMessage" class="send-btn">➤</button>
+      </div>
+    </div>
+    <!-- 자동 모달 열기 스크립트 -->
+    <script>
+      // 페이지 로드 시 오류 메시지에 따라 모달 자동 열기
+      document.addEventListener('DOMContentLoaded', function() {
+        console.log('🔍 DOM 로드 완료, 모달 상태 확인 중...');
+        
+        // 로그인 관련 메시지가 있는지 확인
+        const loginMessages = document.getElementById('loginMessages');
+        const signupMessages = document.getElementById('signupMessages');
+        
+        let shouldOpenLoginModal = false;
+        let shouldOpenSignupModal = false;
+        let isAutoOpen = false; // 자동 열기인지 확인하는 플래그
+
+        // 서버에서 전달된 modal_state 확인
+        {% if modal_state %}
+          isAutoOpen = true; // 서버에서 온 상태이므로 자동 열기
+          {% if modal_state == 'login' %}
+            shouldOpenLoginModal = true;
+            console.log('✅ 서버에서 로그인 모달 상태 감지됨');
+          {% elif modal_state == 'signup' %}
+            shouldOpenSignupModal = true;
+            console.log('✅ 서버에서 회원가입 모달 상태 감지됨');
+          {% endif %}
+        {% else %}
+          // 메시지 기반 감지 (폴백)
+          if (loginMessages && loginMessages.children.length > 0) {
+            shouldOpenLoginModal = true;
+            isAutoOpen = true;
+            console.log('📝 로그인 오류 메시지 감지됨');
+          }
+          
+          if (signupMessages && signupMessages.children.length > 0) {
+            shouldOpenSignupModal = true;
+            isAutoOpen = true;
+            console.log('📝 회원가입 오류 메시지 감지됨');
+          }
+          
+          // Django 메시지 태그 기반 감지
+          {% if messages and not user.is_authenticated %}
+            {% for message in messages %}
+              {% if 'login' in message.tags %}
+                shouldOpenLoginModal = true;
+                isAutoOpen = true;
+                console.log('🏷️ Django 메시지 태그에서 로그인 오류 감지됨');
+              {% elif 'signup' in message.tags %}
+                shouldOpenSignupModal = true;
+                isAutoOpen = true;
+                console.log('🏷️ Django 메시지 태그에서 회원가입 오류 감지됨');
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        {% endif %}
+        
+        // 전역 함수로 자동 모달 열기 함수 정의
+        window.openModalWithContent = function(modalId) {
+          const modal = document.getElementById(modalId);
+          if (!modal) {
+            console.error(`Modal with id '${modalId}' not found`);
+            return;
+          }
+
+          // 모달 표시 (초기화하지 않고)
+          modal.style.display = "block";
+          document.body.style.overflow = "hidden";
+          
+          // 모달 상태 설정
+          if (typeof window.modalState !== 'undefined') {
+            window.modalState.currentModal = modalId;
+            window.modalState.isAnimating = true;
+          }
+
+          // 페이드인 효과
+          setTimeout(() => {
+            modal.classList.add("modal-show");
+            if (typeof window.modalState !== 'undefined') {
+              window.modalState.isAnimating = false;
+            }
+          }, 10);
+
+          // 포커스 관리 (기존 값이 있는 경우를 고려)
+          setTimeout(() => {
+            if (modalId === 'loginModal') {
+              const emailInput = modal.querySelector('input[name="email_or_username"]');
+              const passwordInput = modal.querySelector('input[name="password"]');
+              
+              if (emailInput && emailInput.value.trim()) {
+                passwordInput.focus();
+              } else if (emailInput) {
+                emailInput.focus();
+              }
+            } else if (modalId === 'signupModal') {
+              const usernameInput = modal.querySelector('#signupUsername');
+              const emailInput = modal.querySelector('#signupEmail');
+              const passwordInput = modal.querySelector('#signupPassword');
+              
+              // 이미 입력된 값이 있는 첫 번째 빈 필드에 포커스
+              if (usernameInput && !usernameInput.value.trim()) {
+                usernameInput.focus();
+              } else if (emailInput && !emailInput.value.trim()) {
+                emailInput.focus();
+              } else if (passwordInput) {
+                passwordInput.focus();
+              }
+            }
+          }, 200);
+
+          console.log("Modal opened with content:", modalId);
+        };
+        
+        // 모달 열기 (우선순위: 회원가입 > 로그인)
+        if (shouldOpenSignupModal) {
+          console.log('🚀 회원가입 모달 열기 (내용 유지)');
+          setTimeout(function() {
+            if (isAutoOpen && typeof openModalWithContent === 'function') {
+              // 자동 열기 시 내용을 유지하며 열기
+              openModalWithContent('signupModal');
+            } else if (typeof openModal === 'function') {
+              // 수동 열기 시 초기화하며 열기
+              openModal('signupModal');
+            }
+          }, 200);
+        } else if (shouldOpenLoginModal) {
+          console.log('🚀 로그인 모달 열기 (내용 유지)');
+          setTimeout(function() {
+            if (isAutoOpen && typeof openModalWithContent === 'function') {
+              // 자동 열기 시 내용을 유지하며 열기
+              openModalWithContent('loginModal');
+            } else if (typeof openModal === 'function') {
+              // 수동 열기 시 초기화하며 열기
+              openModal('loginModal');
+            }
+          }, 200);
+        }
+        
+        // 디버깅 정보
+        console.log('🔍 모달 상태 체크 결과:', {
+          shouldOpenLoginModal,
+          shouldOpenSignupModal,
+          isAutoOpen,
+          hasLoginMessages: loginMessages ? loginMessages.children.length : 0,
+          hasSignupMessages: signupMessages ? signupMessages.children.length : 0,
+          modalState: '{{ modal_state|default:"none" }}',
+          userAuthenticated: {{ user.is_authenticated|yesno:"true,false" }}
+        });
+      });
+      
+      // 폼 제출 후 리디렉션 처리
+      window.addEventListener('beforeunload', function() {
+        // 페이지를 떠날 때 모달 상태 초기화
+        if (typeof window.modalState !== 'undefined') {
+          window.modalState.preventClose = false;
+        }
+      });
+    </script>
+    <script src="{% static 'js/modals.js' %}"></script>
+    <script src="{% static 'js/chat.js' %}"></script>
+    <script src="{% static 'js/script.js' %}"></script>
+    {% block extra_js %}
+    {% endblock %}
+  </body>
+</html>

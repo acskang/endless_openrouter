@@ -1,0 +1,268 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Yaya SVG</title>
+    <style>
+/* CSS 초기화 및 기본 스타일 */
+/* * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary: #a3a3ff;
+  --bg-dark: #1a1a1a;
+  --text-white: #ffffff;
+}
+
+body {
+  font-family: "Segoe UI", sans-serif;
+  background: var(--bg-dark);
+  color: var(--text-white);
+  min-height: 100vh;
+} */
+
+/* === 야야 SVG === */
+.yaya-svg {
+  position: fixed;
+  width: 80px;
+  height: 80px;
+  z-index: 500;
+  left: -100px;
+  top: 50vh;
+  transform: translateY(-50%);
+  cursor: pointer;
+  opacity: 0;
+}
+
+.yaya-svg:hover {
+  transform: translateY(-50%) scale(1.1);
+  filter: drop-shadow(0 0 10px var(--primary));
+}
+
+.yaya-svg.animate {
+  animation: float 6s ease-in-out;
+}
+
+.svg-fallback {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--primary), #8b8bff);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+}
+
+/* === 말풍선 === */
+.speech-bubble {
+  position: fixed;
+  background: linear-gradient(135deg, var(--primary), #8b8bff);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  z-index: 501;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(163, 163, 255, 0.3);
+}
+
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 8px solid transparent;
+  border-top-color: var(--primary);
+}
+
+.speech-bubble.show {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* === 토스트 === */
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #4ade80, #22c55e);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  z-index: 1000;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.3s ease;
+  font-weight: bold;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* === 애니메이션 === */
+@keyframes float {
+  0%, 100% {
+    left: -100px;
+    opacity: 0;
+  }
+  10%, 90% {
+    opacity: 1;
+  }
+  50% {
+    left: calc(100vw - 40px);
+  }
+}
+    </style>
+</head>
+<body>
+
+<!-- 야야 SVG -->
+<div id="yayaSvg" class="yaya-svg">
+  <img src="{% static 'img/yaya.svg' %}" alt="Yaya" width="80" height="80" 
+       onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+  <div class="svg-fallback" style="display: none;">🎬</div>
+</div>
+
+<script>
+// === 설정 ===
+const CONFIG = {
+  messages: ["Movie Clips", "영화 검색!", "시작해요!", "Endless..."],
+  interval: 20000,  // 20초마다 애니메이션
+  duration: 15000,   // 15초 동안 애니메이션
+  delay: 2000       // 2초 후 시작
+};
+
+// === 메인 함수 ===
+function initYayaSvg() {
+  const svg = document.getElementById("yayaSvg");
+  if (!svg) return;
+
+  let isAnimating = false;
+  let bubble = null;
+
+  // 랜덤 메시지
+  function getRandomMessage() {
+    return CONFIG.messages[Math.floor(Math.random() * CONFIG.messages.length)];
+  }
+
+  // 토스트 메시지
+  function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => toast.classList.add('show'), 100);
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => document.body.removeChild(toast), 300);
+    }, 2000);
+  }
+
+  // 말풍선 생성/표시
+  function showBubble() {
+    if (bubble) return;
+
+    bubble = document.createElement('div');
+    bubble.className = 'speech-bubble';
+    bubble.textContent = getRandomMessage();
+    document.body.appendChild(bubble);
+
+    setTimeout(() => bubble.classList.add('show'), 1000);
+  }
+
+  // 말풍선 위치 업데이트
+  function updateBubblePosition() {
+    if (!bubble || !isAnimating) return;
+
+    const rect = svg.getBoundingClientRect();
+    bubble.style.left = rect.left + rect.width / 2 - bubble.offsetWidth / 2 + 'px';
+    bubble.style.top = rect.top - bubble.offsetHeight - 10 + 'px';
+  }
+
+  // 말풍선 숨기기
+  function hideBubble() {
+    if (bubble) {
+      bubble.classList.remove('show');
+      setTimeout(() => {
+        if (bubble && document.body.contains(bubble)) {
+          document.body.removeChild(bubble);
+          bubble = null;
+        }
+      }, 300);
+    }
+  }
+
+  // 애니메이션 시작
+  function startAnimation() {
+    if (isAnimating) return;
+
+    isAnimating = true;
+    
+    // 랜덤 Y 위치
+    svg.style.top = Math.random() * (window.innerHeight * 0.8) + window.innerHeight * 0.1 + 'px';
+    
+    // 애니메이션 클래스 추가
+    svg.classList.add('animate');
+    showBubble();
+
+    // 위치 업데이트
+    const updateInterval = setInterval(updateBubblePosition, 100);
+
+    // 애니메이션 종료
+    setTimeout(() => {
+      isAnimating = false;
+      svg.classList.remove('animate');
+      hideBubble();
+      clearInterval(updateInterval);
+      
+      // 다음 애니메이션 예약
+      setTimeout(startAnimation, CONFIG.interval - CONFIG.duration);
+    }, CONFIG.duration);
+  }
+
+  // 클릭 이벤트
+  svg.addEventListener('click', () => {
+    if (isAnimating) {
+      showToast('🎉 영화 검색 페이지로 이동!');
+      console.log('페이지 이동: /movie/');
+      // window.location.href = '/movie/';
+    }
+  });
+
+  // 말풍선 클릭
+  document.addEventListener('click', (e) => {
+    if (bubble && bubble.contains(e.target)) {
+      svg.click();
+    }
+  });
+
+  // 창 크기 변경 시
+  window.addEventListener('resize', () => {
+    if (!isAnimating) {
+      svg.style.top = Math.random() * (window.innerHeight * 0.8) + window.innerHeight * 0.1 + 'px';
+    }
+  });
+
+  // 시작
+  setTimeout(startAnimation, CONFIG.delay);
+  console.log('🎬 야야 SVG 초기화 완료!');
+}
+
+// === 초기화 ===
+document.addEventListener('DOMContentLoaded', initYayaSvg);
+</script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+/* === HERO SECTION 수정 - 동적 높이 조정 === */
+.hero {
+  /* 초기에는 welcome-section을 고려한 높이 */
+  min-height: calc(100vh - 200px); /* welcome-section 예상 높이만큼 빼기 */
+  display: flex;
+  align-items: center;
+  position: relative;
+  background: var(--gradient-dark);
+  overflow: hidden;
+  transition: min-height 0.5s ease; /* 부드러운 높이 전환 */
+}
+
+/* welcome-section이 제거된 후의 hero section */
+.hero.welcome-removed {
+  min-height: 100vh; /* 전체 화면 높이로 확장 */
+}
+
+/* 또는 JavaScript 없이 CSS만으로 처리하려면 */
+.main-content {
+  margin-top: 100px;
+  padding: 2rem;
+  text-align: center;
+  min-height: calc(100vh - 100px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* welcome-section이 사라진 후 main-content와 hero 조정 */
+.main-content.welcome-hidden {
+  justify-content: flex-start;
+  padding-top: 0;
+}
+
+.main-content.welcome-hidden .hero {
+  min-height: 100vh;
+  margin-top: -100px; /* navbar 높이만큼 위로 이동 */
+  padding-top: 100px; /* navbar 공간 확보 */
+}
+
+/* 대안: body에 클래스 추가 방식 */
+body.welcome-section-hidden .hero {
+  min-height: 100vh;
+}
+
+body.welcome-section-hidden .main-content {
+  justify-content: flex-start;
+  padding-top: 0;
+}
+
+/* 스크롤바 방지를 위한 전체 페이지 조정 */
+body.welcome-section-hidden {
+  overflow-x: hidden; /* 가로 스크롤 방지 */
+}
+
+body.welcome-section-hidden .hero {
+  min-height: calc(100vh - 100px); /* navbar 높이 고려 */
+  max-height: calc(100vh - 100px); /* 최대 높이 제한 */
+}

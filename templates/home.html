@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}" />
+{% endblock extra_css %}
+{% block content %}
+
+<!-- Loading Screen -->
+<div id="loading" class="loading">
+    <div class="loader"></div>
+</div>
+
+{% if user.is_authenticated %}
+  {% include 'yaya.html' %}
+{% endif %}
+  
+<!-- Hero Section -->
+<section id="home" class="hero">
+    <div class="hero-container">
+        <div class="hero-content fade-in">
+            <h1>Revolutionary AI-Collaborative Development</h1>
+            <p>Transform your development workflow with our 11-stage methodology that delivers 10x productivity gains through seamless AI integration.</p>
+            <div class="hero-buttons">
+                <a href="#services" class="btn">Explore Methodology</a>
+                <a href="#contact" class="btn secondary">Get Consultation</a>
+            </div>
+            {% if user.is_authenticated %}
+            <div style="margin-top: 20px; padding: 15px; background: rgba(163, 163, 255, 0.1); border-radius: 10px;">
+                <p style="margin: 0; color: var(--primary-purple);">
+                    <strong>환영합니다, {{ user.full_name }}님!</strong><br>
+                    AI 채팅 가능 횟수: {{ user.api_calls_remaining }}/{{ user.api_calls_limit }}
+                </p>
+            </div>
+            {% endif %}
+        </div>
+        <div class="hero-image-container fade-in">
+            <img src="{% static 'img/new-yaya.jpg' %}" alt="AI Development" class="hero-image">
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section id="about" class="section about">
+    <div class="container">
+        <div class="section-header fade-in">
+            <h2 class="section-title">About TheSysM</h2>
+            <p class="section-subtitle">Pioneering the future of collaborative AI development</p>
+        </div>
+        
+        <div class="about-content fade-in">
+            <div class="about-text">
+                <h3>Revolutionary Approach</h3>
+                <p>Our 11-stage AI-collaborative development methodology represents a paradigm shift in how software is created. By seamlessly integrating artificial intelligence into every phase of development, we've achieved unprecedented efficiency gains.</p>
+                <p>This approach doesn't replace developers—it amplifies their capabilities, allowing teams to focus on high-level architecture and creative problem-solving while AI handles routine tasks.</p>
+            </div>
+            <img src="{% static 'img/MAMethodology.jpg' %}" alt="Development Process" class="about-image">
+        </div>
+
+        <div class="about-team fade-in">
+            <img src="{% static 'img/sandiegoKang.jpg' %}" alt="ganzsKang" class="team-image">
+            <h3>ganzsKang</h3>
+            <h4>Lead AI Development Strategist</h4>
+            <p>Creator of the revolutionary 11-stage methodology</p>
+            <p>Contact: <a href="mailto:acskang@gmail.com">acskang@gmail.com</a></p>
+        </div>
+    </div>
+</section>
+
+<!-- Services Section -->
+<section id="services" class="section">
+    <div class="container">
+        <div class="section-header fade-in">
+            <h2 class="section-title">Our Services</h2>
+            <p class="section-subtitle">Comprehensive AI-collaborative development solutions</p>
+        </div>
+        
+        <div class="services-grid">
+            <div class="service-item fade-in">
+                <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Methodology" class="service-image">
+                <h3>11-Stage Methodology</h3>
+                <p>Complete implementation of our revolutionary development process that transforms how teams build software.</p>
+            </div>
+            
+            <div class="service-item fade-in">
+                <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Consultation" class="service-image">
+                <h3>Strategic Consultation</h3>
+                <p>Expert guidance on integrating AI-collaborative workflows into your existing development processes.</p>
+            </div>
+            
+            <div class="service-item fade-in">
+                <img src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Training" class="service-image">
+                <h3>Team Training</h3>
+                <p>Comprehensive training programs to upskill your development teams for AI-collaborative workflows.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Consultation CTA -->
+<section id="contact" class="section consultation">
+    <div class="container">
+        <h2>Ready to Transform Your Development?</h2>
+        <p>Schedule a consultation to learn how our methodology can deliver 10x productivity gains for your team.</p>
+        <a href="mailto:acskang@gmail.com" class="btn">Get Started Today</a>
+    </div>
+</section>
+
+
+
+{% endblock content %}
+
+{% block extra_js %}
+
+{% endblock %}
