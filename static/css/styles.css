@@ -1079,3 +1079,115 @@ body {
     border-color: var(--text-white);
   }
 }
+
+.modal-backdrop {
+  z-index: 1040 !important;
+  background-color: rgba(0, 0, 0, 0.7) !important;
+}
+
+.modal {
+  z-index: 1050 !important;
+}
+
+.modal-dialog {
+  z-index: 1055 !important;
+}
+
+.modal-content {
+  z-index: 1060 !important;
+}
+
+/* 2. 네비게이션 z-index 조정 */
+.navbar {
+  z-index: 999 !important; /* 모달보다 낮게 설정 */
+}
+
+/* 3. 누락된 CSS 변수 정의 */
+:root {
+  --primary-dark: #1a1a1a !important;
+}
+
+/* 4. 모달 표시 강제 설정 */
+.modal.show {
+  display: block !important;
+  opacity: 1 !important;
+}
+
+.modal.fade.show {
+  opacity: 1 !important;
+}
+
+/* 5. 비디오 모달 특별 설정 */
+#video-modal {
+  z-index: 1070 !important;
+}
+
+#video-modal .modal-dialog {
+  z-index: 1075 !important;
+}
+
+#video-modal .modal-content {
+  z-index: 1080 !important;
+  background: #2a2a2a !important;
+  border: 2px solid rgba(163, 163, 255, 0.3) !important;
+}
+
+/* 6. 디버그용 모달 하이라이트 (임시) */
+.modal-debug-highlight {
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.8) !important;
+  border: 3px solid red !important;
+}
+
+/* 7. Speech Bubble CSS 변수 수정 */
+.speech-bubble {
+  background: #ffffff !important;
+  color: #1a1a1a !important; /* --primary-dark 대신 직접 값 사용 */
+  border: 2px solid var(--primary-purple) !important;
+}
+
+.speech-bubble.pulse {
+  animation: bubblePulseFixed 1.5s ease-in-out infinite;
+}
+
+@keyframes bubblePulseFixed {
+  0%,
+  100% {
+    background: #ffffff !important;
+    color: #1a1a1a !important;
+    border-color: var(--primary-purple) !important;
+  }
+  50% {
+    background: var(--primary-purple) !important;
+    color: #ffffff !important;
+    border-color: #ffffff !important;
+  }
+}
+
+/* 8. 모달 애니메이션 강제 활성화 */
+.modal.fade {
+  transition: opacity 0.15s linear !important;
+}
+
+.modal.fade .modal-dialog {
+  transition: transform 0.3s ease-out !important;
+  transform: translate(0, -50px) !important;
+}
+
+.modal.show .modal-dialog {
+  transform: none !important;
+}
+
+/* 9. 모바일에서 모달 전체화면 방지 */
+@media (max-width: 768px) {
+  #video-modal .modal-dialog {
+    max-width: 95% !important;
+    margin: 2rem auto !important;
+  }
+}
+
+/* 10. 비디오 요소 보장 */
+#modal-video {
+  max-width: 100% !important;
+  height: auto !important;
+  background: #000 !important;
+}
