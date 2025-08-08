@@ -93,37 +93,37 @@ LOGGING = {
     },
     "root": {
         "handlers": ["console"],
-        "level": "INFO",
+        "level": "CRITICAL",
     },
     "loggers": {
         "django": {
             "handlers": ["file"],
-            "level": "INFO",
+            "level": "CRITICAL",
             "propagate": False,
         },
         "django.request": {
             "handlers": ["file"],
-            "level": "INFO",
+            "level": "CRITICAL",
             "propagate": False,
         },
         "channels": {
             "handlers": ["file"],
-            "level": "INFO",
+            "level": "CRITICAL",
             "propagate": False,
         },
         "chat": {
             "handlers": ["file"],
-            "level": "INFO",
+            "level": "CRITICAL",
             "propagate": False,
         },
         "daphne": {
             "handlers": ["file"],
-            "level": "INFO",
+            "level": "CRITICAL",
             "propagate": False,
         },
         "api": {
             "handlers": ["file"],
-            "level": "INFO",
+            "level": "CRITICAL",
             "propagate": False,
         },
     },
