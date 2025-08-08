@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 # 환경에 따른 .env 파일 로드
 # settings.DEBUG를 사용하여 환경 판단
-if settings.DEBUG:
+if os.getenv("ENVIRONMENT") == "production":
     env_file = ".env_local"
 else:
     env_file = ".env_prod"
